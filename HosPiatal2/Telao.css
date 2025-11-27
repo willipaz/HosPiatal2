@@ -1,0 +1,137 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+header {
+    text-align: center;
+    padding: 50px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+header h1 {
+    font-size: 4em;
+    margin: 0;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7), 0 0 20px #fff; }
+    to { text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7), 0 0 30px #fff, 0 0 40px #fff; }
+}
+
+header p {
+    font-size: 2em;
+    margin: 10px 0;
+    opacity: 0.9;
+}
+
+section#telao {
+    display: flex;
+    height: calc(100vh - 200px);
+    padding: 20px;
+    gap: 20px;
+    overflow: hidden;
+}
+
+#senhasNormais, #senhasPreferenciais, #ultimasSenhasChamadas {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+#senhasNormais h2 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #4CAF50;
+    border-bottom: 3px solid #4CAF50;
+    padding-bottom: 10px;
+}
+
+#senhasPreferenciais h2 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #FF9800;
+    border-bottom: 3px solid #FF9800;
+    padding-bottom: 10px;
+}
+
+#ultimasSenhasChamadas h2 {
+    text-align: center;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #2196F3;
+    border-bottom: 3px solid #2196F3;
+    padding-bottom: 10px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    font-size: 3em;
+    padding: 15px;
+    margin: 10px 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    text-align: center;
+    animation: slideInRight 0.5s ease-out;
+    border-left: 5px solid #ddd;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+#senhasNormais li {
+    border-left-color: #4CAF50;
+}
+
+#senhasPreferenciais li {
+    border-left-color: #FF9800;
+}
+
+#ultimasSenhasChamadas li {
+    border-left-color: #2196F3;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 1.2em;
+}
+
+@media (max-width: 768px) {
+    section#telao {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    header h1 {
+        font-size: 2.5em;
+    }
+    
+    li {
+        font-size: 2em;
+    }
+}

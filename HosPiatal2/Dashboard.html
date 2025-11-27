@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Dashboard - Dados do Banco</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            color: black;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .data-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .search-form {
+            margin-bottom: 20px;
+        }
+        .search-form input, .search-form button {
+            padding: 8px;
+            margin-right: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="Home.html">Página Inicial</a>
+            <a href="Contato.html">Contato</a>
+            <a href="Triagem.html">Triagem</a>
+            <a href="Telao.html">Telão</a>
+            <a href="Prontuario.html">Prontuário</a>
+            <a href="Dashboard.html">Dashboard</a>
+        </nav>
+        <h1>Dashboard do Hospital - Dados do Banco</h1>
+        <p>Visualização de todos os dados armazenados no sistema</p>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="section">
+            <h2>Triagens Registradas</h2>
+            <div id="triages-loading" class="loading">Carregando triagens...</div>
+            <div id="triages-error" class="error" style="display: none;"></div>
+            <table id="triages-table" class="data-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Senha</th>
+                        <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Especialidade</th>
+                        <th>Sintomas</th>
+                        <th>Status</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody id="triages-body">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Buscar Prontuário por CPF</h2>
+            <div class="search-form">
+                <input type="text" id="cpf-search" placeholder="Digite o CPF do paciente">
+                <button id="search-btn">Buscar</button>
+            </div>
+            <div id="prontuario-loading" class="loading" style="display: none;">Buscando prontuário...</div>
+            <div id="prontuario-error" class="error" style="display: none;"></div>
+            <div id="prontuario-results" style="display: none;">
+                <h3>Histórico Médico Completo</h3>
+                <div id="prontuario-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Hospital Exemplo. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTriages();
+            setupSearch();
+        });
+
+        async function loadTriages() {
+            const loading = document.getElementById('triages-loading');
+            const error = document.getElementById('triages-error');
+            const table = document.getElementById('triages-table');
+            const tbody = document.getElementById('triages-body');
+
+            try {
+                const response = await fetch('http://localhost:3000/api/triages');
+                if (!response.ok) {
+                    throw new Error('Falha ao carregar triagens');
+                }
+                const triages = await response.json();
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+
+                if (triages.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7">Nenhuma triagem encontrada.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = triages.map(triage => `
+                    <tr>
+                        <td>${triage.senha}</td>
+                        <td>${triage.nome}</td>
+                        <td>${triage.cpf}</td>
+                        <td>${triage.especialidade}</td>
+                        <td>${triage.sintomas || '-'}</td>
+                        <td>${triage.status}</td>
+                        <td>${new Date(triage.timestamp).toLocaleString()}</td>
+                    </tr>
+                `).join('');
+
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = 'Erro ao carregar triagens: ' + err.message;
+                console.error('Error loading triages:', err);
+            }
+        }
+
+        function setupSearch() {
+            const searchBtn = document.getElementById('search-btn');
+            const cpfInput = document.getElementById('cpf-search');
+
+            searchBtn.addEventListener('click', function() {
+                const cpf = cpfInput.value.trim();
+                if (!cpf) {
+                    alert('Por favor, digite um CPF.');
+                    return;
+                }
+                searchProntuario(cpf);
+            });
+
+            cpfInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+        }
+
+        async function searchProntuario(cpf) {
+            const loading = document.getElementById('prontuario-loading');
+            const error = document.getElementById('prontuario-error');
+            const results = document.getElementById('prontuario-results');
+            const list = document.getElementById('prontuario-list');
+
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            results.style.display = 'none';
+
+            try {
+                const response = await fetch(`http://localhost:3000/api/prontuario/${cpf}`);
+                if (!response.ok) {
+                    throw new Error('Falha ao buscar prontuário');
+                }
+                const registros = await response.json();
+
+                loading.style.display = 'none';
+                results.style.display = 'block';
+
+                if (registros.length === 0) {
+                    list.innerHTML = '<p>Nenhum registro médico encontrado para este CPF.</p>';
+                    return;
+                }
+
+                list.innerHTML = registros.map(registro => `
+                    <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; background-color: white;">
+                        <p><strong>Especialidade:</strong> ${registro.especialidade}</p>
+                        <p><strong>Nome:</strong> ${registro.nome}</p>
+                        <p><strong>Idade:</strong> ${registro.idade}</p>
+                        ${registro.rg ? `<p><strong>RG:</strong> ${registro.rg}</p>` : ''}
+                        ${registro.sintomas ? `<p><strong>Sintomas:</strong> ${registro.sintomas}</p>` : ''}
+                        ${registro.procedimentos ? `<p><strong>Procedimentos:</strong> ${registro.procedimentos}</p>` : ''}
+                        ${registro.exames ? `<p><strong>Exames:</strong> ${registro.exames}</p>` : ''}
+                        ${registro.medicamentos ? `<p><strong>Medicamentos:</strong> ${registro.medicamentos}</p>` : ''}
+                        ${registro.observacao ? `<p><strong>Observação:</strong> ${registro.observacao}</p>` : ''}
+                        ${registro.status ? `<p><strong>Status:</strong> ${registro.status}</p>` : ''}
+                        <p><strong>Data:</strong> ${registro.data}</p>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                loading.style.display = 'none';
+                error.style.display = 'block';
+                error.textContent = 'Erro ao buscar prontuário: ' + err.message;
+                console.error('Error searching prontuario:', err);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Exemplo - Sala de Pediatria</title>
+    <link rel="stylesheet" href="Pediatria.css">
+</head>
+<body>
+    <div id="login" class="card">
+        <h2>Acesso à Sala de Pediatria</h2>
+        <input type="password" id="senha" placeholder="Digite a senha do médico">
+        <button id="entrar">Entrar</button>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <header>
+            <nav>
+                <a href="Home.html">Página Inicial</a>
+                <a href="Contato.html">Contato</a>
+                <a href="Triagem.html">Triagem</a>
+                <a href="Telao.html">Telão</a>
+                <a href="Prontuario.html">Prontuário</a>
+            </nav>
+            <h1>Sala Mágica da Pediatria! 🏥✨</h1>
+            <p>Onde o médico cuida das criancinhas com amor e diversão!</p>
+        </header>
+
+        <div class="card">
+            <h2>Triagens Pendentes</h2>
+            <div id="listaTriagens"></div>
+        </div>
+
+        <section id="consulta">
+        <form id="consultaForm">
+            <div class="card" id="infoPaciente">
+                <h2>Informações do Paciente</h2>
+                <div class="paciente-grid">
+                    <div class="field-group">
+                        <label for="pacienteNome">Qual é o nome do nosso pequeno paciente? 👶</label>
+                        <input type="text" id="pacienteNome" name="pacienteNome" placeholder="Digite o nome completo do paciente" required>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="pacienteIdade">Quantos aninhos tem o nosso amiguinho? 🎂</label>
+                        <input type="number" id="pacienteIdade" name="pacienteIdade" min="0" placeholder="Ex: 5" required>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="pacienteRG">Documento de identificação: 🆔</label>
+                        <input type="text" id="pacienteRG" name="pacienteRG" placeholder="Digite o RG ou outro documento" required>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="pacienteCPF">CPF do paciente: 🆔</label>
+                        <input type="text" id="pacienteCPF" name="pacienteCPF" placeholder="Digite o CPF" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="registroConsulta">
+                <h2>Registro da Consulta</h2>
+                <div class="consulta-grid">
+                    <div class="field-group">
+                        <label for="procedimentos">O que fizemos hoje para cuidar do nosso paciente? 💉</label>
+                        <textarea id="procedimentos" name="procedimentos" placeholder="Descreva os procedimentos realizados nesta consulta (ex: exame físico, vacinação, etc.)..."></textarea>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="exames">Quais exames vamos fazer para ficar tudo bem? 🔬</label>
+                        <textarea id="exames" name="exames" placeholder="Liste os exames solicitados (ex: hemograma, raio-X, ultrassom)..."></textarea>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="medicamentos">Remédios para ficar forte e saudável! 💊</label>
+                        <textarea id="medicamentos" name="medicamentos" placeholder="Liste os medicamentos prescritos com dosagem e instruções (ex: Paracetamol 500mg, 1 comprimido a cada 6h)..."></textarea>
+                    </div>
+                </div>
+                <button type="submit" id="salvarBtn">Salvar Registro da Consulta</button>
+            </div>
+        </form>
+
+        <div class="card" id="registrosAnteriores">
+            <h2>Registros Anteriores</h2>
+            <div id="listaRegistros"></div>
+        </div>
+
+
+    </section>
+
+    <footer>
+        <p>&copy; 2023 Hospital Exemplo. Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginDiv = document.getElementById('login');
+            const mainContent = document.getElementById('main-content');
+            const entrarBtn = document.getElementById('entrar');
+            const senhaInput = document.getElementById('senha');
+
+            entrarBtn.addEventListener('click', function() {
+                if (senhaInput.value === 'medico123') {
+                    loginDiv.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    initializePediatria();
+                } else {
+                    alert('Senha incorreta. Acesso negado.');
+                }
+            });
+
+            function initializePediatria() {
+                carregarTriagens();
+                const form = document.getElementById('consultaForm');
+                const listaRegistros = document.getElementById('listaRegistros');
+
+                // Load previous records
+                let registros = JSON.parse(localStorage.getItem('registrosPediatria') || '[]');
+                atualizarLista();
+
+                form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const registro = {
+                    nome: document.getElementById('pacienteNome').value,
+                    idade: document.getElementById('pacienteIdade').value,
+                    rg: document.getElementById('pacienteRG').value,
+                    cpf: document.getElementById('pacienteCPF').value,
+                    procedimentos: document.getElementById('procedimentos').value,
+                    exames: document.getElementById('exames').value,
+                    medicamentos: document.getElementById('medicamentos').value,
+                    data: new Date().toLocaleString('pt-BR')
+                };
+                registros.push(registro);
+                localStorage.setItem('registrosPediatria', JSON.stringify(registros));
+
+                // Salvar no prontuario global
+                const prontuario = JSON.parse(localStorage.getItem('prontuario') || '{}');
+                const cpf = registro.cpf;
+                if (!prontuario[cpf]) {
+                    prontuario[cpf] = [];
+                }
+                prontuario[cpf].push({
+                    especialidade: 'pediatria',
+                    nome: registro.nome,
+                    idade: registro.idade,
+                    rg: registro.rg,
+                    procedimentos: registro.procedimentos,
+                    exames: registro.exames,
+                    medicamentos: registro.medicamentos,
+                    data: registro.data
+                });
+                localStorage.setItem('prontuario', JSON.stringify(prontuario));
+
+                // Gerar e baixar arquivo Word
+                const conteudo = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Informações do Paciente - Pediatria</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+        h1 { color: #FF69B4; text-align: center; border-bottom: 2px solid #FF69B4; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Informações do Paciente - Pediatria</h1>
+    <table>
+        <tr><th>Nome</th><td>${registro.nome}</td></tr>
+        <tr><th>Idade</th><td>${registro.idade} anos</td></tr>
+        <tr><th>RG</th><td>${registro.rg}</td></tr>
+        <tr><th>CPF</th><td>${registro.cpf}</td></tr>
+        <tr><th>Procedimentos</th><td>${registro.procedimentos}</td></tr>
+        <tr><th>Exames</th><td>${registro.exames}</td></tr>
+        <tr><th>Medicamentos</th><td>${registro.medicamentos}</td></tr>
+        <tr><th>Data</th><td>${registro.data}</td></tr>
+    </table>
+    <div class="footer">Documento gerado automaticamente pelo sistema de pediatria.</div>
+</body>
+</html>`;
+                const blob = new Blob([conteudo], { type: 'application/msword;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Registro_Paciente_Pediatria_${registro.nome}_${registro.data.replace(/[:/]/g, '-')}.doc`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                // Remove the triagem from localStorage after saving
+                if (window.triagemSelecionada) {
+                    let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                    const triagemIndex = triagens.findIndex(t => t.senha === window.triagemSelecionada.senha);
+                    if (triagemIndex !== -1) {
+                        triagens.splice(triagemIndex, 1);
+                        localStorage.setItem('triagens', JSON.stringify(triagens));
+                    }
+                }
+
+                form.reset();
+                atualizarLista();
+                carregarTriagens();
+                alert('Registro salvo com sucesso!');
+            });
+
+            function atualizarLista() {
+                listaRegistros.innerHTML = registros.map((reg, index) => `
+                    <li>
+                        <strong>${reg.nome} (${reg.idade} anos) - ${reg.data}</strong><br>
+                        Procedimentos: ${reg.procedimentos || 'Nenhum'}<br>
+                        Exames: ${reg.exames || 'Nenhum'}<br>
+                        Medicamentos: ${reg.medicamentos || 'Nenhum'}
+                        <button onclick="removerRegistro(${index})">Remover</button>
+                    </li>
+                `).join('');
+            }
+
+            window.removerRegistro = function(index) {
+                registros.splice(index, 1);
+                localStorage.setItem('registrosPediatria', JSON.stringify(registros));
+                atualizarLista();
+            };
+
+            function carregarTriagens() {
+                const listaTriagens = document.getElementById('listaTriagens');
+                listaTriagens.innerHTML = '';
+                let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                triagens = triagens.filter(t => t.especialidade === 'pediatria' && t.status === 'pendente');
+                if (triagens.length === 0) {
+                    listaTriagens.innerHTML = '<p>Nenhuma triagem pendente.</p>';
+                    return;
+                }
+                triagens.forEach((triagem, index) => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<p><strong>${triagem.senha}</strong> - ${triagem.nome} - ${triagem.sintomas}</p><button onclick="selecionarTriagem(${index})">Selecionar</button>`;
+                    listaTriagens.appendChild(div);
+                });
+            }
+
+            window.selecionarTriagem = function(index) {
+                let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                const triagem = triagens.filter(t => t.especialidade === 'pediatria' && t.status === 'pendente')[index];
+                document.getElementById('pacienteNome').value = triagem.nome;
+                document.getElementById('pacienteIdade').value = triagem.idade;
+                document.getElementById('pacienteRG').value = triagem.rg;
+                document.getElementById('pacienteCPF').value = triagem.cpf;
+                // Preencher sintomas no campo de procedimentos ou em um campo separado se necessário
+                document.getElementById('procedimentos').value = `Sintomas: ${triagem.sintomas}`;
+                window.triagemSelecionada = triagem;
+            };
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Exemplo - Telão de Senhas</title>
+    <link rel="stylesheet" href="Telao.css">
+</head>
+<body>
+    <header>
+        <h1>Próximas Senhas</h1>
+        <p>Atualizando em tempo real</p>
+    </header>
+
+    <section id="telao">
+        <div id="senhasNormais">
+            <h2>Senhas Normais</h2>
+            <ul id="listaNormais"></ul>
+        </div>
+
+        <div id="senhasPreferenciais">
+            <h2>Senhas Preferenciais</h2>
+            <ul id="listaPreferenciais"></ul>
+        </div>
+
+        <div id="ultimasSenhasChamadas">
+            <h2>Últimas Senhas Chamadas</h2>
+            <ul id="listaUltimasChamadas"></ul>
+        </div>
+    </section>
+
+    <script>
+        function atualizarTelão() {
+            const senhas = JSON.parse(localStorage.getItem('senhas') || '[]');
+            const triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+            const getSenha = s => typeof s === 'string' ? s : s.senha;
+            const getTimestamp = s => typeof s === 'string' ? 0 : s.timestamp; // old strings have no timestamp, show them
+            const dezMinutos = 10 * 60 * 1000; // 10 minutos em ms
+            const senhasDisponiveis = senhas.filter(s => Date.now() - getTimestamp(s) < dezMinutos);
+            const normais = senhasDisponiveis.filter(s => getSenha(s).startsWith('S-'));
+            const preferenciais = senhasDisponiveis.filter(s => getSenha(s).startsWith('P-'));
+
+            document.getElementById('listaNormais').innerHTML = normais.map(s => `<li>${getSenha(s)}</li>`).join('');
+            document.getElementById('listaPreferenciais').innerHTML = preferenciais.map(s => `<li>${getSenha(s)}</li>`).join('');
+
+            // Últimas senhas chamadas (status diferente de pendente, nos últimos 5 minutos)
+            const cincoMinutos = 5 * 60 * 1000; // 5 minutos em ms
+            const chamadas = triagens
+                .filter(t => t.status && t.status !== 'pendente' && Date.now() - new Date(t.dataCompleta) < cincoMinutos)
+                .sort((a, b) => new Date(b.dataCompleta) - new Date(a.dataCompleta))
+                .slice(0, 5);
+
+            document.getElementById('listaUltimasChamadas').innerHTML = chamadas.map(t => `<li>${t.senha} - ${t.nome} - ${t.status}</li>`).join('');
+
+            // Animação para novas senhas (simples highlight)
+            const lis = document.querySelectorAll('#telao li');
+            lis.forEach(li => {
+                li.style.animation = 'none';
+                li.offsetHeight; // Trigger reflow
+                li.style.animation = 'highlight 2s ease-out';
+            });
+        }
+
+        // Atualizar a cada 5 segundos
+        setInterval(atualizarTelão, 5000);
+        atualizarTelão(); // Inicial
+    </script>
+</body>
+</html>

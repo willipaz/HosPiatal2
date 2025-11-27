@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Exemplo - Triagem</title>
+    <link rel="stylesheet" href="Triagem.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="Home.html">Página Inicial</a>
+            <a href="Contato.html">Contato</a>
+            <a href="Triagem.html">Triagem</a>
+            <a href="Telao.html">Telão</a>
+            <a href="Prontuario.html">Prontuário</a>
+            <a href="Pediatria.html">Pediatria</a>
+            <a href="Ortopedia.html">Ortopedia</a>
+            <a href="Cardiologia.html">Cardiologia</a>
+        </nav>
+        <h1>Triagem de Pacientes</h1>
+        <p>Preencha as informações para gerar sua senha</p>
+    </header>
+
+    <section id="triagem">
+        <form id="triagemForm">
+            <div class="field-group">
+                <label for="nome">Nome do Paciente:</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+
+            <div id="tempoAtendimento" style="margin: 20px 0; font-weight: bold; display:none;">
+                <p>Tempo estimado para atendimento médico após cadastro:</p>
+                <ul>
+                    <li>Emergência: 00:00 - Fila: 0</li>
+                    <li>Urgência: 00:00 - Fila: 0</li>
+                    <li>Preferencial: 00:01 - Fila: 1</li>
+                    <li>Isolamento: 00:00 - Fila: 0</li>
+                    <li>Pouca Urgência: 00:23 - Fila: 2</li>
+                </ul>
+            </div>
+
+            <div class="field-group">
+                <label for="rg">RG:</label>
+                <input type="text" id="rg" name="rg" required>
+            </div>
+
+            <div class="field-group">
+                <label for="idade">Idade:</label>
+                <input type="number" id="idade" name="idade" min="0" required>
+            </div>
+
+            <div class="field-group">
+                <label for="sus">Carteira do SUS:</label>
+                <input type="text" id="sus" name="sus" required>
+            </div>
+
+            <div class="field-group">
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf" name="cpf" required>
+            </div>
+
+            <div class="field-group">
+                <label for="telefone">Telefone:</label>
+                <input type="tel" id="telefone" name="telefone" required>
+            </div>
+
+            <div class="field-group">
+                <label for="sexo">Sexo:</label>
+                <select id="sexo" name="sexo" required>
+                    <option value="">Selecione</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label for="especialidade">Especialidade:</label>
+                <select id="especialidade" name="especialidade" required>
+                    <option value="">Selecione</option>
+                    <option value="cardiologia">Cardiologia</option>
+                    <option value="pediatria">Pediatria</option>
+                    <option value="ortopedia">Ortopedia</option>
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label for="sintomas">Sintomas do Paciente:</label>
+                <textarea id="sintomas" name="sintomas" rows="3" placeholder="Descreva os sintomas"></textarea>
+            </div>
+
+            <button type="button" id="gerarSenha">Gerar Senha</button>
+            <button type="button" id="gerarPreferencial" style="display: none;">Gerar Senha Preferencial</button>
+        </form>
+
+        <div id="resultado" style="display: none;">
+            <h3>Sua Senha:</h3>
+            <p id="senhaGerada"></p>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2023 Hospital Exemplo. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

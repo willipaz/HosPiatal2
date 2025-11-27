@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Exemplo - Sala de Ortopedia</title>
+    <link rel="stylesheet" href="Ortopedia.css">
+</head>
+<body>
+    <div id="login" class="card">
+        <h2>Acesso à Sala de Ortopedia</h2>
+        <input type="password" id="senha" placeholder="Digite a senha do médico">
+        <button id="entrar">Entrar</button>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <header>
+            <nav>
+                <a href="Home.html">Página Inicial</a>
+                <a href="Contato.html">Contato</a>
+                <a href="Triagem.html">Triagem</a>
+                <a href="Telao.html">Telão</a>
+                <a href="Prontuario.html">Prontuário</a>
+            </nav>
+            <h1>Sala de Ortopedia</h1>
+            <p>Cuidados Especializados em Ortopedia</p>
+        </header>
+
+        <section class="intro">
+            <h2>Bem-vindo à Sala de Ortopedia</h2>
+            <p>Especializados em cuidados ortopédicos, oferecendo tratamentos para ossos, articulações e músculos. Nossa equipe dedicada está aqui para ajudar você a recuperar a mobilidade e o bem-estar.</p>
+        </section>
+
+        <div class="card">
+            <h2>Triagens Pendentes</h2>
+            <div id="listaTriagens"></div>
+        </div>
+
+        <div class="card" id="formRegistro" style="display: none;">
+            <h2>Completar Registro</h2>
+            <input type="text" id="nomePaciente" placeholder="Nome do Paciente" readonly>
+            <input type="number" id="idadePaciente" placeholder="Idade" readonly>
+            <textarea id="sintomas" placeholder="Sintomas do Paciente" rows="3" readonly></textarea>
+            <textarea id="procedimentos" placeholder="Descrição dos Procedimentos" rows="5"></textarea>
+            <textarea id="medicamentos" placeholder="Medicamentos prescritos" rows="3"></textarea>
+            <textarea id="observacao" placeholder="Observação" rows="3"></textarea>
+            <select id="status">
+                <option value="">Selecione Status</option>
+                <option value="Alta">Alta</option>
+                <option value="Internação">Internação</option>
+            </select>
+            <button id="salvarRegistro">Salvar Registro</button>
+        </div>
+
+
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginDiv = document.getElementById('login');
+            const mainContent = document.getElementById('main-content');
+            const entrarBtn = document.getElementById('entrar');
+            const senhaInput = document.getElementById('senha');
+
+            entrarBtn.addEventListener('click', function() {
+                if (senhaInput.value === 'medico123') {
+                    loginDiv.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    carregarTriagens();
+                } else {
+                    alert('Senha incorreta. Acesso negado.');
+                }
+            });
+
+            function carregarTriagens() {
+                const listaTriagens = document.getElementById('listaTriagens');
+                listaTriagens.innerHTML = '';
+                let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                triagens = triagens.filter(t => t.especialidade === 'ortopedia' && t.status === 'pendente');
+                if (triagens.length === 0) {
+                    listaTriagens.innerHTML = '<p>Nenhuma triagem pendente.</p>';
+                    return;
+                }
+                triagens.forEach((triagem, index) => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<p><strong>${triagem.senha}</strong> - ${triagem.nome} - ${triagem.sintomas}</p><button onclick="selecionarTriagem(${index})">Selecionar</button>`;
+                    listaTriagens.appendChild(div);
+                });
+            }
+
+            window.selecionarTriagem = function(index) {
+                let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                const triagem = triagens.filter(t => t.especialidade === 'ortopedia' && t.status === 'pendente')[index];
+                document.getElementById('nomePaciente').value = triagem.nome;
+                document.getElementById('idadePaciente').value = triagem.idade;
+                document.getElementById('sintomas').value = triagem.sintomas;
+                document.getElementById('formRegistro').style.display = 'block';
+                window.triagemSelecionada = triagem;
+            };
+
+            const salvarBtn = document.getElementById('salvarRegistro');
+            const inputs = {
+                nome: document.getElementById('nomePaciente'),
+                idade: document.getElementById('idadePaciente'),
+                procedimentos: document.getElementById('procedimentos'),
+                medicamentos: document.getElementById('medicamentos'),
+                sintomas: document.getElementById('sintomas'),
+                status: document.getElementById('status')
+            };
+
+            // Carregar registros anteriores
+            let registros = JSON.parse(localStorage.getItem('registrosOrtopedia') || '[]');
+
+            salvarBtn.addEventListener('click', function() {
+                const procedimentos = inputs.procedimentos.value.trim();
+                const medicamentos = inputs.medicamentos.value.trim();
+                const observacao = document.getElementById('observacao').value.trim();
+                const status = inputs.status.value;
+
+                if (!procedimentos || !medicamentos || !observacao || !status) {
+                    alert('Por favor, preencha procedimentos, medicamentos, observação e status.');
+                    return;
+                }
+
+                const nome = inputs.nome.value;
+                const idade = inputs.idade.value;
+                const sintomas = inputs.sintomas.value;
+                const data = new Date().toLocaleString();
+
+                // Gerar e baixar arquivo Word
+                const conteudo = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Informações do Paciente - Ortopedia</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+        h1 { color: #007bff; text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Informações do Paciente - Ortopedia</h1>
+    <table>
+        <tr><th>Nome</th><td>${nome}</td></tr>
+        <tr><th>Idade</th><td>${idade} anos</td></tr>
+        <tr><th>Sintomas</th><td>${sintomas}</td></tr>
+        <tr><th>Procedimentos</th><td>${procedimentos}</td></tr>
+        <tr><th>Medicamentos</th><td>${medicamentos}</td></tr>
+        <tr><th>Observação</th><td>${observacao}</td></tr>
+        <tr><th>Status</th><td>${status}</td></tr>
+        <tr><th>Data</th><td>${data}</td></tr>
+    </table>
+    <div class="footer">Documento gerado automaticamente pelo sistema de ortopedia.</div>
+</body>
+</html>`;
+                const blob = new Blob([conteudo], { type: 'application/msword;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Registro_Paciente_Ortopedia_${nome}_${data.replace(/[:/]/g, '-')}.doc`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                // Update triagem and remove from localStorage after saving
+                let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                const triagemIndex = triagens.findIndex(t => t.senha === window.triagemSelecionada.senha);
+                if (triagemIndex !== -1) {
+                    triagens[triagemIndex].procedimentos = procedimentos;
+                    triagens[triagemIndex].medicamentos = medicamentos;
+                    triagens[triagemIndex].observacao = observacao;
+                    triagens[triagemIndex].status = status;
+                    triagens[triagemIndex].dataCompleta = new Date().toLocaleString();
+                    // Remove the triagem from localStorage after saving
+                    triagens.splice(triagemIndex, 1);
+                    localStorage.setItem('triagens', JSON.stringify(triagens));
+                }
+
+                // Salvar no prontuario global
+                const prontuario = JSON.parse(localStorage.getItem('prontuario') || '{}');
+                const cpf = window.triagemSelecionada.cpf;
+                if (!prontuario[cpf]) {
+                    prontuario[cpf] = [];
+                }
+                prontuario[cpf].push({
+                    especialidade: 'ortopedia',
+                    nome,
+                    idade,
+                    sintomas,
+                    procedimentos,
+                    medicamentos,
+                    observacao,
+                    status,
+                    data
+                });
+                localStorage.setItem('prontuario', JSON.stringify(prontuario));
+
+                // Limpar inputs
+                Object.values(inputs).forEach(input => input.value = '');
+                document.getElementById('observacao').value = '';
+                document.getElementById('procedimentos').value = '';
+                document.getElementById('formRegistro').style.display = 'none';
+                carregarTriagens();
+            });
+
+
+        });
+    </script>
+</body>
+</html>

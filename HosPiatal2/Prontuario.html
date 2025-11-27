@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hospital Exemplo - Prontuário do Paciente</title>
+    <link rel="stylesheet" href="Prontuario.css" />
+</head>
+<body>
+    <div id="login" class="card">
+        <h2>Acesso ao Prontuário do Paciente</h2>
+        <input type="password" id="senha" placeholder="Digite a senha do médico" />
+        <button id="entrar">Entrar</button>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <header>
+            <nav>
+                <a href="Home.html">Página Inicial</a>
+                <a href="Contato.html">Contato</a>
+                <a href="Triagem.html">Triagem</a>
+                <a href="Telao.html">Telão</a>
+            </nav>
+            <h1>Prontuário do Paciente</h1>
+            <p>Consulta centralizada ao histórico médico do paciente</p>
+        </header>
+
+        <section class="intro">
+            <h2>Buscar Histórico do Paciente</h2>
+            <p>Digite o CPF do paciente para visualizar todo o histórico médico registrado no sistema.</p>
+        </section>
+
+        <div class="card">
+            <h2>Buscar por CPF</h2>
+            <input type="text" id="cpfBusca" placeholder="Digite o CPF do Paciente">
+            <button id="buscarProntuario">Buscar</button>
+            <div id="prontuarioResultado"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginDiv = document.getElementById('login');
+            const mainContent = document.getElementById('main-content');
+            const entrarBtn = document.getElementById('entrar');
+            const senhaInput = document.getElementById('senha');
+
+            entrarBtn.addEventListener('click', function () {
+                if (senhaInput.value === 'medico123') {
+                    loginDiv.style.display = 'none';
+                    mainContent.style.display = 'block';
+                } else {
+                    alert('Senha incorreta. Acesso negado.');
+                }
+            });
+
+            // Buscar prontuario
+            const buscarBtn = document.getElementById('buscarProntuario');
+            buscarBtn.addEventListener('click', async function() {
+                const cpf = document.getElementById('cpfBusca').value.trim();
+                if (!cpf) {
+                    alert('Por favor, digite o CPF.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:3000/api/prontuario/${cpf}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch medical records');
+                    }
+                    const registros = await response.json();
+                    const resultadoDiv = document.getElementById('prontuarioResultado');
+
+                    if (registros.length === 0) {
+                        resultadoDiv.innerHTML = '<p>Nenhum registro encontrado para este CPF.</p>';
+                        return;
+                    }
+
+                    let html = '<h3>Histórico Completo do Paciente</h3>';
+                    registros.forEach(registro => {
+                        html += `
+                            <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+                                <p><strong>Especialidade:</strong> ${registro.especialidade}</p>
+                                <p><strong>Nome:</strong> ${registro.nome}</p>
+                                <p><strong>Idade:</strong> ${registro.idade}</p>
+                                ${registro.rg ? `<p><strong>RG:</strong> ${registro.rg}</p>` : ''}
+                                ${registro.sintomas ? `<p><strong>Sintomas:</strong> ${registro.sintomas}</p>` : ''}
+                                ${registro.procedimentos ? `<p><strong>Procedimentos:</strong> ${registro.procedimentos}</p>` : ''}
+                                ${registro.exames ? `<p><strong>Exames:</strong> ${registro.exames}</p>` : ''}
+                                ${registro.medicamentos ? `<p><strong>Medicamentos:</strong> ${registro.medicamentos}</p>` : ''}
+                                ${registro.observacao ? `<p><strong>Observação:</strong> ${registro.observacao}</p>` : ''}
+                                ${registro.status ? `<p><strong>Status:</strong> ${registro.status}</p>` : ''}
+                                <p><strong>Data:</strong> ${registro.data}</p>
+                            </div>
+                        `;
+                    });
+                    resultadoDiv.innerHTML = html;
+                } catch (error) {
+                    console.error('Error fetching medical records:', error);
+                    alert('Erro ao buscar registros médicos. Verifique se o servidor está rodando.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

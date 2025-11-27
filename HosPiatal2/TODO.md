@@ -1,0 +1,10 @@
+- [x] Remover arquivos Dermatologia.html e Dermatologia.css
+- [x] Editar Triagem.html para remover opções de especialidade: ginecologia, dermatologia, oftalmologia
+- [x] Verificar se há outros arquivos que referenciam dermatologia e atualizar se necessário
+- [x] Add login system to Cardiologia.html and Ortopedia.html
+- [x] Fix duplicate code in Ortopedia.html
+- [x] Add navigation to Cardiologia.html
+- [x] Add background images to Cardiologia.html, Ortopedia.html, and Pediatria.html
+- [x] Confirmar que apenas as telas pediatria, ortopedia e cardiologia estão disponíveis
+- [x] Adicionar seção "Triagens Pendentes" em todas as salas (Pediatria, Ortopedia, Cardiologia)
+- [x] Implementar geração automática de formulário Word ao salvar registro e remoção do paciente pendente

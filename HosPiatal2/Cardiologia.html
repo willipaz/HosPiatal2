@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Exemplo - Sala de Cardiologia</title>
+    <link rel="stylesheet" href="Cardiologia.css">
+</head>
+<body>
+    <div id="login" class="card">
+        <h2>Acesso à Sala de Cardiologia</h2>
+        <input type="password" id="senha" placeholder="Digite a senha do médico">
+        <button id="entrar">Entrar</button>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <header>
+            <nav>
+                <a href="Home.html">Página Inicial</a>
+                <a href="Contato.html">Contato</a>
+                <a href="Triagem.html">Triagem</a>
+                <a href="Telao.html">Telão</a>
+                <a href="Prontuario.html">Prontuário</a>
+            </nav>
+            <h1>Sala de Cardiologia</h1>
+            <p>Especialistas em diagnóstico, tratamento e prevenção de doenças cardíacas</p>
+        </header>
+
+        <section class="intro">
+            <h2>Bem-vindo à Sala de Cardiologia</h2>
+            <p>Especializados em cuidados cardíacos, oferecendo tratamentos para doenças do coração e vasos sanguíneos. Nossa equipe dedicada está aqui para ajudar você a manter a saúde cardiovascular.</p>
+        </section>
+
+        <div class="card">
+            <h2>Triagens Pendentes</h2>
+            <div id="listaTriagens"></div>
+        </div>
+
+        <div class="card" id="formProcedimentos" style="display: none;">
+            <h2>Adicionar Procedimentos</h2>
+            <input type="text" id="nomePaciente" placeholder="Nome do Paciente" readonly>
+            <input type="number" id="idadePaciente" placeholder="Idade" readonly>
+            <textarea id="sintomas" placeholder="Sintomas do Paciente" rows="3" readonly></textarea>
+            <textarea id="procedimentos" placeholder="Descrição dos Procedimentos" rows="5"></textarea>
+            <textarea id="observacao" placeholder="Observação" rows="3"></textarea>
+            <textarea id="medicamentos" placeholder="Medicamentos Prescritos" rows="3"></textarea>
+            <select id="status">
+                <option value="">Selecione Status</option>
+                <option value="Alta">Alta</option>
+                <option value="Internação">Internação</option>
+            </select>
+            <button id="salvarProcedimentos">Salvar Procedimentos</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginDiv = document.getElementById('login');
+            const mainContent = document.getElementById('main-content');
+            const entrarBtn = document.getElementById('entrar');
+            const senhaInput = document.getElementById('senha');
+
+            entrarBtn.addEventListener('click', function() {
+                if (senhaInput.value === 'medico123') {
+                    loginDiv.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    carregarTriagens();
+                } else {
+                    alert('Senha incorreta. Acesso negado.');
+                }
+            });
+
+            function carregarTriagens() {
+                const listaTriagens = document.getElementById('listaTriagens');
+                listaTriagens.innerHTML = '';
+                let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                triagens = triagens.filter(t => t.especialidade === 'cardiologia' && t.status === 'pendente');
+                if (triagens.length === 0) {
+                    listaTriagens.innerHTML = '<p>Nenhuma triagem pendente.</p>';
+                    return;
+                }
+                triagens.forEach((triagem, index) => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `<p><strong>${triagem.senha}</strong> - ${triagem.nome} - ${triagem.sintomas}</p><button onclick="selecionarTriagem(${index})">Selecionar</button>`;
+                    listaTriagens.appendChild(div);
+                });
+            }
+
+            window.selecionarTriagem = function(index) {
+                let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                const triagem = triagens.filter(t => t.especialidade === 'cardiologia' && t.status === 'pendente')[index];
+                document.getElementById('nomePaciente').value = triagem.nome;
+                document.getElementById('idadePaciente').value = triagem.idade;
+                document.getElementById('sintomas').value = triagem.sintomas;
+                document.getElementById('formProcedimentos').style.display = 'block';
+                window.triagemSelecionada = triagem;
+            };
+
+            const salvarBtn = document.getElementById('salvarProcedimentos');
+            const inputs = {
+                nome: document.getElementById('nomePaciente'),
+                idade: document.getElementById('idadePaciente'),
+                procedimentos: document.getElementById('procedimentos'),
+                sintomas: document.getElementById('sintomas'),
+                status: document.getElementById('status')
+            };
+
+            salvarBtn.addEventListener('click', async function() {
+                const procedimentos = inputs.procedimentos.value.trim();
+                const observacao = document.getElementById('observacao').value.trim();
+                const medicamentos = document.getElementById('medicamentos').value.trim();
+                const status = inputs.status.value;
+
+                if (!procedimentos || !observacao || !medicamentos || !status) {
+                    alert('Por favor, preencha procedimentos, observação, medicamentos e status.');
+                    return;
+                }
+
+                const nome = inputs.nome.value;
+                const idade = inputs.idade.value;
+                const sintomas = inputs.sintomas.value;
+                const data = new Date().toLocaleString();
+
+                // Gerar e baixar arquivo Word
+                const conteudo = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Informações do Paciente - Cardiologia</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+        h1 { color: #dc143c; text-align: center; border-bottom: 2px solid #dc143c; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Informações do Paciente - Cardiologia</h1>
+    <table>
+        <tr><th>Nome</th><td>${nome}</td></tr>
+        <tr><th>Idade</th><td>${idade} anos</td></tr>
+        <tr><th>Sintomas</th><td>${sintomas}</td></tr>
+        <tr><th>Procedimentos</th><td>${procedimentos}</td></tr>
+        <tr><th>Medicamentos</th><td>${medicamentos}</td></tr>
+        <tr><th>Observação</th><td>${observacao}</td></tr>
+        <tr><th>Status</th><td>${status}</td></tr>
+        <tr><th>Data</th><td>${data}</td></tr>
+    </table>
+    <div class="footer">Documento gerado automaticamente pelo sistema de cardiologia.</div>
+</body>
+</html>`;
+                const blob = new Blob([conteudo], { type: 'application/msword;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `Registro_Paciente_Cardiologia_${nome}_${data.replace(/[:/]/g, '-')}.doc`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                // Update triagem and remove from localStorage after saving
+                let triagens = JSON.parse(localStorage.getItem('triagens') || '[]');
+                const triagemIndex = triagens.findIndex(t => t.senha === window.triagemSelecionada.senha);
+                if (triagemIndex !== -1) {
+                    triagens[triagemIndex].procedimentos = procedimentos;
+                    triagens[triagemIndex].observacao = observacao;
+                    triagens[triagemIndex].medicamentos = medicamentos;
+                    triagens[triagemIndex].status = status;
+                    triagens[triagemIndex].dataCompleta = new Date().toLocaleString();
+                    // Remove the triagem from localStorage after saving
+                    triagens.splice(triagemIndex, 1);
+                    localStorage.setItem('triagens', JSON.stringify(triagens));
+                }
+
+                // Save to database
+                try {
+                    await fetch('http://localhost:3000/api/medical-record', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            cpf: window.triagemSelecionada.cpf,
+                            especialidade: 'cardiologia',
+                            procedimentos,
+                            exames: '', // No exams field in this form
+                            medicamentos,
+                            observacao,
+                            status
+                        }),
+                    });
+                } catch (error) {
+                    console.error('Error saving medical record:', error);
+                    alert('Erro ao salvar registro médico no banco de dados.');
+                }
+
+                // Limpar inputs
+                Object.values(inputs).forEach(input => input.value = '');
+                document.getElementById('observacao').value = '';
+                document.getElementById('medicamentos').value = '';
+                document.getElementById('formProcedimentos').style.display = 'none';
+                carregarTriagens();
+            });
+        });
+    </script>
+</body>
+</html>
