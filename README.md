@@ -1,13 +1,18 @@
 PROJETO PRÁTICO DA UNIVERSIDADE NOVE DE JULHO
 
-//PARTICIPANTES//
+PARTICIPANTES
 
-//Edvanylson Silva de Assunção - RA: 2224100666//
-//Gabriel Azevedo Sampaio - RA: 222410346//
-//Lucas dos Santos Nunes - RA: 2224100961//
-//Marco Antônio Souza Silva - RA: 2224100414//
-//Murilo Bento dos Santos - RA: 2224105655//
-//William Paz de Souza - RA: 2224102685//
+Edvanylson Silva de Assunção
+
+Gabriel Azevedo Sampaio 
+
+Lucas dos Santos Nunes 
+
+Marco Antônio Souza Silva 
+
+Murilo Bento dos Santos 
+
+William Paz de Souza 
 
 1. Objetivo do projeto 
 O objetivo principal do projeto foi criar um sistema prático, funcional, 
